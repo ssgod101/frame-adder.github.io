@@ -12,6 +12,9 @@ body {
     min-height: 100vh;
     padding: 10px;
     color: #333;
+    overflow-x: hidden;
+    overscroll-behavior: none;
+    touch-action: manipulation;
 }
 
 .container {
@@ -95,6 +98,26 @@ input[type="file"] {
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
+.dimensions-display {
+    margin-top: 12px;
+    padding: 10px;
+    background: #f0f0f0;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    color: #555;
+}
+
+.dimensions-display small {
+    display: block;
+    font-weight: 500;
+}
+
+.dimensions-display small:first-child {
+    color: #333;
+    font-weight: 600;
+}
+
 .download-section {
     text-align: center;
     margin: 12px 0;
@@ -160,6 +183,25 @@ input[type="file"] {
 }
 
 .corner-toggle label {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    white-space: nowrap;
+}
+
+.frame-only-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0;
+    background: none;
+    margin: 0;
+    border-radius: 0;
+    grid-column: 1 / -1;
+}
+
+.frame-only-toggle label {
     font-size: 12px;
     font-weight: 600;
     color: #333;
@@ -296,30 +338,36 @@ input[type="file"] {
 
 input[type="range"] {
     width: 100%;
-    height: 6px;
+    height: 30px;
     border-radius: 5px;
     background: linear-gradient(to right, #667eea 0%, #764ba2 100%);
     outline: none;
     -webkit-appearance: none;
     appearance: none;
     cursor: pointer;
+    touch-action: manipulation;
+    display: flex;
+    align-items: center;
+    padding: 12px 0;
+    margin: 0;
 }
 
 input[type="range"]::-webkit-slider-thumb {
     -webkit-appearance: none;
     appearance: none;
-    width: 18px;
-    height: 18px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: white;
     cursor: pointer;
     box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
     border: 2px solid #667eea;
+    margin-top: 0;
 }
 
 input[type="range"]::-moz-range-thumb {
-    width: 18px;
-    height: 18px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     background: white;
     cursor: pointer;

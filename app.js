@@ -1,8 +1,46 @@
+// Prevent horizontal page dragging on iOS while allowing vertical scroll and slider drag
+let touchStartX = 0;
+let touchStartY = 0;
+
+document.addEventListener('touchstart', (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener('touchmove', (e) => {
+    // Allow touch movement on interactive elements (inputs, buttons, sliders, etc.)
+    const target = e.target;
+    if (target.tagName === 'INPUT' || 
+        target.tagName === 'BUTTON' ||
+        target.tagName === 'LABEL' ||
+        target.classList.contains('frame-btn') ||
+        target.classList.contains('color-btn') ||
+        target.classList.contains('tab-btn') ||
+        target.classList.contains('toggle-btn')) {
+        return; // Allow default behavior on interactive elements
+    }
+    
+    const touchCurrentX = e.touches[0].clientX;
+    const touchCurrentY = e.touches[0].clientY;
+    const diffX = Math.abs(touchCurrentX - touchStartX);
+    const diffY = Math.abs(touchCurrentY - touchStartY);
+    
+    // Only prevent default if horizontal movement is greater than vertical (horizontal swipe)
+    // Allow vertical scrolling to work normally
+    if (diffX > diffY && diffX > 10) {
+        e.preventDefault();
+    }
+}, { passive: false });
+
 let originalImage = null;
 let currentFrameStyle = 'classic';
 let currentFrameColor = '#8B4513';
-let currentFrameWidth = 20;
+let currentFrameWidth = 1.0; // Width in inches
 let cornerStyle = 'rounded';
+let frameOnlyMode = false; // Toggle for frame-only preview
+const DPI = 96; // Screen DPI (standard screen DPI)
+const INCH_TO_PX = DPI; // Conversion factor for screen display
+const CM_TO_INCH = 1 / 2.54; // For reference if needed
 
 const imageInput = document.getElementById('imageInput');
 const cameraInput = document.getElementById('cameraInput');
@@ -17,6 +55,9 @@ const frameWidth = document.getElementById('frameWidth');
 const widthValue = document.getElementById('widthValue');
 const colorInput = document.getElementById('colorInput');
 const colorHex = document.getElementById('colorHex');
+const dimensionsDisplay = document.getElementById('dimensionsDisplay');
+const imageDimensions = document.getElementById('imageDimensions');
+const frameInfo = document.getElementById('frameInfo');
 
 // Register Service Worker
 if ('serviceWorker' in navigator) {
@@ -80,8 +121,8 @@ colorInput.addEventListener('input', (e) => {
 
 // Frame width slider
 frameWidth.addEventListener('input', (e) => {
-    currentFrameWidth = parseInt(e.target.value);
-    widthValue.textContent = currentFrameWidth;
+    currentFrameWidth = parseFloat(e.target.value);
+    widthValue.textContent = currentFrameWidth.toFixed(2);
     applyFrame();
 });
 
@@ -94,6 +135,28 @@ document.querySelectorAll('.toggle-btn').forEach(btn => {
         applyFrame();
     });
 });
+
+// Frame-only mode toggle
+const frameImageToggle = document.getElementById('frameImageToggle');
+const frameOnlyToggle = document.getElementById('frameOnlyToggle');
+
+if (frameImageToggle) {
+    frameImageToggle.addEventListener('click', (e) => {
+        frameImageToggle.classList.add('active');
+        frameOnlyToggle.classList.remove('active');
+        frameOnlyMode = false;
+        applyFrame();
+    });
+}
+
+if (frameOnlyToggle) {
+    frameOnlyToggle.addEventListener('click', (e) => {
+        frameOnlyToggle.classList.add('active');
+        frameImageToggle.classList.remove('active');
+        frameOnlyMode = true;
+        applyFrame();
+    });
+}
 
 // Tab switching
 document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -120,73 +183,114 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 function applyFrame() {
     if (!originalImage) return;
 
-    const frameSize = currentFrameWidth;
-    const padding = frameSize * 2;
+    // Convert frame width from inches to pixels for screen display
+    const frameSizePixels = currentFrameWidth * INCH_TO_PX;
     
-    canvas.width = originalImage.width + padding;
-    canvas.height = originalImage.height + padding;
+    // In frame-only mode, show a full letter-size page (8.5" x 11") for testing on standard paper
+    let imageWidth = originalImage.width;
+    let imageHeight = originalImage.height;
+    
+    if (frameOnlyMode) {
+        // Create an 8.5" x 11" frame swatch (letter-size paper) for testing print dimensions
+        // This allows you to print and test on standard paper without scaling
+        imageWidth = 8.5 * INCH_TO_PX;
+        imageHeight = 11 * INCH_TO_PX;
+    }
+    
+    const padding = frameSizePixels * 2;
+    
+    canvas.width = imageWidth + padding;
+    canvas.height = imageHeight + padding;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     // Draw frame based on style
     switch(currentFrameStyle) {
         case 'classic':
-            drawClassicFrame(frameSize);
+            drawClassicFrame(frameSizePixels);
             break;
         case 'modern':
-            drawModernFrame(frameSize);
+            drawModernFrame(frameSizePixels);
             break;
         case 'ornate':
-            drawOrnateFrame(frameSize);
+            drawOrnateFrame(frameSizePixels);
             break;
         case 'polaroid':
-            drawPolaroidFrame(frameSize);
+            drawPolaroidFrame(frameSizePixels);
             break;
         case 'shadow':
-            drawShadowFrame(frameSize);
+            drawShadowFrame(frameSizePixels);
             break;
         case 'double':
-            drawDoubleFrame(frameSize);
+            drawDoubleFrame(frameSizePixels);
             break;
         case 'neon':
-            drawNeonFrame(frameSize);
+            drawNeonFrame(frameSizePixels);
             break;
         case 'vintage':
-            drawVintageFrame(frameSize);
+            drawVintageFrame(frameSizePixels);
             break;
         case 'emboss':
-            drawEmbossFrame(frameSize);
+            drawEmbossFrame(frameSizePixels);
             break;
         case 'architectural':
-            drawArchitecturalFrame(frameSize);
+            drawArchitecturalFrame(frameSizePixels);
             break;
         case 'minimalist':
-            drawMinimalistFrame(frameSize);
+            drawMinimalistFrame(frameSizePixels);
             break;
         case 'victorian':
-            drawVictorianFrame(frameSize);
+            drawVictorianFrame(frameSizePixels);
             break;
         case 'classical':
-            drawClassicalFrame(frameSize);
+            drawClassicalFrame(frameSizePixels);
             break;
         case 'metallic':
-            drawMetallicFrame(frameSize);
+            drawMetallicFrame(frameSizePixels);
             break;
     }
 
-    // Draw image
-    ctx.drawImage(originalImage, frameSize, frameSize, originalImage.width, originalImage.height);
+    // Draw image only if not in frame-only mode
+    if (!frameOnlyMode) {
+        ctx.drawImage(originalImage, frameSizePixels, frameSizePixels, originalImage.width, originalImage.height);
+    } else {
+        // In frame-only mode, fill the center with white to show the frame clearly
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(frameSizePixels, frameSizePixels, imageWidth, imageHeight);
+    }
 
     // Apply corner radius to the entire canvas
-    applyCanvasCornerRadius(frameSize);
+    applyCanvasCornerRadius(frameSizePixels);
+
+    // Display image dimensions
+    displayImageDimensions();
 
     canvasContainer.classList.remove('hidden');
     downloadSection.classList.remove('hidden');
 }
 
+// Display image dimensions in inches
+function displayImageDimensions() {
+    if (frameOnlyMode) {
+        // In frame-only mode, show the test area size and frame thickness
+        imageDimensions.textContent = `Test Area: 8.5" × 11" (Letter Size - Print at 100%)`;
+        frameInfo.textContent = `Frame Thickness: ${currentFrameWidth.toFixed(2)}" | Measure printed frame to verify accuracy`;
+    } else {
+        // Convert pixels to inches (assuming 96 DPI screen)
+        const widthIn = (originalImage.width / INCH_TO_PX).toFixed(2);
+        const heightIn = (originalImage.height / INCH_TO_PX).toFixed(2);
+        const totalWidthIn = ((originalImage.width + currentFrameWidth * INCH_TO_PX * 2) / INCH_TO_PX).toFixed(2);
+        const totalHeightIn = ((originalImage.height + currentFrameWidth * INCH_TO_PX * 2) / INCH_TO_PX).toFixed(2);
+        
+        imageDimensions.textContent = `Image: ${widthIn}" × ${heightIn}"`;
+        frameInfo.textContent = `With Frame (${currentFrameWidth.toFixed(2)}"): ${totalWidthIn}" × ${totalHeightIn}"`;
+    }
+    dimensionsDisplay.classList.remove('hidden');
+}
+
 // Apply corner radius to entire canvas based on cornerStyle
-function applyCanvasCornerRadius(frameSize) {
-    const radius = cornerStyle === 'rounded' ? frameSize * 0.8 : 0;
+function applyCanvasCornerRadius(frameSizePixels) {
+    const radius = cornerStyle === 'rounded' ? frameSizePixels * 0.8 : 0;
     
     if (radius === 0) return; // No rounding needed
     
@@ -904,12 +1008,13 @@ resetBtn.addEventListener('click', () => {
     frameSelector.classList.add('hidden');
     canvasContainer.classList.add('hidden');
     downloadSection.classList.add('hidden');
+    dimensionsDisplay.classList.add('hidden');
     imageInput.value = '';
     currentFrameColor = '#8B4513';
-    currentFrameWidth = 20;
+    currentFrameWidth = 1.0;
     cornerStyle = 'rounded';
-    frameWidth.value = '20';
-    widthValue.textContent = '20';
+    frameWidth.value = '1.0';
+    widthValue.textContent = '1.00';
     colorInput.value = '#8B4513';
     colorHex.textContent = '#8B4513';
     document.querySelectorAll('.frame-btn').forEach(b => b.classList.remove('active'));
