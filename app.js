@@ -162,7 +162,6 @@ function applyFrame() {
 
     // Convert frame width from inches to pixels for screen display
     const frameSizePixels = currentFrameWidth * INCH_TO_PX;
-    
     const imageWidth = originalImage.width;
     const imageHeight = originalImage.height;
     const padding = frameSizePixels * 2;
@@ -218,7 +217,7 @@ function applyFrame() {
             break;
     }
 
-    // Draw image
+    // Draw image on the frame
     ctx.drawImage(originalImage, frameSizePixels, frameSizePixels, originalImage.width, originalImage.height);
 
     // Apply corner radius to the entire canvas
