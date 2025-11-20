@@ -3,7 +3,7 @@
   "short_name": "Photo Frame",
   "description": "Add beautiful frames to your photos with customizable styles and colors",
   "start_url": "/frame-adder/",
-  "scope": "/frame-adder/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#4CAF50",
