@@ -1,10 +1,10 @@
-const CACHE_NAME = 'photo-frame-v1';
+const CACHE_NAME = 'photo-frame-v2';
 const urlsToCache = [
-  './',
-  './index.html',
-  './style.css',
-  './app.js',
-  './manifest.json'
+  '/frame-adder/',
+  '/frame-adder/index.html',
+  '/frame-adder/style.css',
+  '/frame-adder/app.js',
+  '/frame-adder/manifest.json'
 ];
 
 self.addEventListener('install', (event) => {
